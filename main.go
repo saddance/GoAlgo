@@ -1,23 +1,36 @@
+// Файл для тестирования тг бота, которого я сделал
+// В офере захардкожен мой айдишник, поэтому не запускайте плз этот код
+// уведомления будут лететь мне
+
 package main
 
 import (
 	"fmt"
-	"go-hack/moex/candles"
+	"go-hack/telegram_bot"
 	"time"
 )
 
+const (
+	BOT_TOKEN = "6721745889:AAE3eqJMlp06VuoQQjDO6NpdXJEXuuzoZqY"
+)
+
 func main() {
-	date, err := time.Parse(time.DateOnly, "2023-12-01")
-	if err != nil {
-		panic(err)
+	Bot := telegram_bot.NewBot(BOT_TOKEN)
+
+	offer := telegram_bot.StocksOffer{
+		1,
+		409733921,
+		"GAZP",
+		4,
+		100,
+		"RUB",
+		400,
 	}
 
-	res, err := candles.GetCandles("stock", "shares", "SBER", 500, date)
-	if err != nil {
-		panic(err)
+	go Bot.RunBot()
+	for i := 0; i < 5; i++ {
+		fmt.Println(i)
+		Bot.SendOffer(offer)
+		time.Sleep(3 * time.Second)
 	}
-
-	fmt.Println(len(res))
-
-	fmt.Println(res)
 }
