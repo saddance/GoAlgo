@@ -6,6 +6,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/gofrs/uuid"
 	"go-hack/telegram_bot"
 	"time"
 )
@@ -17,8 +18,10 @@ const (
 func main() {
 	Bot := telegram_bot.NewBot(BOT_TOKEN)
 
+	Uuid, _ := uuid.NewV1()
+
 	offer := telegram_bot.StocksOffer{
-		1,
+		Uuid,
 		409733921,
 		"GAZP",
 		4,
@@ -31,6 +34,6 @@ func main() {
 	for i := 0; i < 5; i++ {
 		fmt.Println(i)
 		Bot.SendOffer(offer)
-		time.Sleep(3 * time.Second)
+		time.Sleep(30 * time.Second)
 	}
 }

@@ -1,16 +1,16 @@
 package telegram_bot
 
-//type StocksOffer struct {
-//	offerId        uint64
-//	telegramUserId int64
-//	ticket         string
-//	amount         uint64
-//	price          float64
-//	totalPrice     float64
-//}
+import (
+	"github.com/gofrs/uuid"
+)
+
+const (
+	Deny uint8 = iota
+	Accept
+)
 
 type StocksOffer struct {
-	OfferId        uint64
+	OfferID        uuid.UUID
 	TelegramUserId int64
 	Ticket         string
 	Amount         uint64
@@ -20,7 +20,6 @@ type StocksOffer struct {
 }
 
 type UserAction struct {
-	OfferId        int64
-	telegramUserId int64
-	action         bool
+	OfferID uuid.UUID
+	Action  uint8
 }

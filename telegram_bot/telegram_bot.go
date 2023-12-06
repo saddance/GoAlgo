@@ -50,18 +50,20 @@ func (Bot BotWrapper) HandleQuery(query *tgbotapi.CallbackQuery) {
 	queryData := query.Data
 	args := strings.Split(queryData, "_")
 
-	offer_id, _ := strconv.Atoi(args[0])
-	action := args[1]
+	offerID := args[0]
+	action64, _ := strconv.Atoi(args[1])
+	action := uint8(action64)
 
-	fmt.Printf("User decided to %s on offer with id %d\n", action, offer_id)
+	fmt.Printf("-------User decided to %s on offer with id %s--------\n", action, offerID)
 
 	message := query.Message
 	var text string
-	if action == "approve" {
+	if action == Accept {
 		text = "✅Вы подтвердили действие"
-	} else if action == "deny" {
+	} else if action == Deny {
 		text = "❌Вы решили не покупать акции"
 	}
+
 	msg := tgbotapi.NewEditMessageText(message.Chat.ID, message.MessageID, message.Text+"\n"+text)
 
 	_, err := Bot.botObject.Send(msg)
@@ -83,8 +85,8 @@ func (Bot BotWrapper) SendOffer(offer StocksOffer) {
 	msg := tgbotapi.NewMessage(offer.TelegramUserId, MessageTextFromOffer(offer))
 
 	buttons := []tgbotapi.InlineKeyboardButton{
-		tgbotapi.NewInlineKeyboardButtonData("✅Купить", fmt.Sprintf("%d_approve", offer.OfferId)),
-		tgbotapi.NewInlineKeyboardButtonData("❌Не покупать", fmt.Sprintf("%d_deny", offer.OfferId))}
+		tgbotapi.NewInlineKeyboardButtonData("✅Купить", fmt.Sprintf("%d_%d", offer.OfferID, Accept)),
+		tgbotapi.NewInlineKeyboardButtonData("❌Не покупать", fmt.Sprintf("%d_%d", offer.OfferID, Deny))}
 
 	KeyboardMarkup := tgbotapi.NewInlineKeyboardMarkup(buttons)
 	msg.ReplyMarkup = KeyboardMarkup
