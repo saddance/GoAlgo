@@ -3,6 +3,7 @@ package telegram_bot
 import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/gofrs/uuid"
 	"strconv"
 	"strings"
 )
@@ -11,13 +12,13 @@ type BotWrapper struct {
 	botObject *tgbotapi.BotAPI
 }
 
-func NewBot(BotToken string) BotWrapper {
+func NewBot(BotToken string, debug bool) BotWrapper {
 	bot, err := tgbotapi.NewBotAPI(BotToken)
 	if err != nil {
 		fmt.Println(err, "Error while trying to run bot")
 		panic(err)
 	}
-	bot.Debug = true
+	bot.Debug = debug
 
 	Bot := BotWrapper{bot}
 
@@ -47,14 +48,7 @@ func (Bot BotWrapper) HandleUpdate(update tgbotapi.Update) {
 }
 
 func (Bot BotWrapper) HandleQuery(query *tgbotapi.CallbackQuery) {
-	queryData := query.Data
-	args := strings.Split(queryData, "_")
-
-	offerID := args[0]
-	action64, _ := strconv.Atoi(args[1])
-	action := uint8(action64)
-
-	fmt.Printf("-------User decided to %s on offer with id %s--------\n", action, offerID)
+	OfferID, action := ParseQueryData(query.Data)
 
 	message := query.Message
 	var text string
@@ -70,6 +64,22 @@ func (Bot BotWrapper) HandleQuery(query *tgbotapi.CallbackQuery) {
 	if err != nil {
 		println("Something went wrong")
 	}
+
+	actionObject := UserAction{OfferID, action}
+
+	ReceiveUserAction(actionObject)
+}
+
+func ParseQueryData(queryData string) (uuid.UUID, uint8) {
+	args := strings.Split(queryData, "_")
+
+	offerID := args[0]
+	action64, _ := strconv.Atoi(args[1])
+	action8 := uint8(action64)
+
+	OfferUUID, _ := uuid.FromString(offerID)
+
+	return OfferUUID, action8
 }
 
 func (Bot BotWrapper) EchoMessage(message *tgbotapi.Message) {
