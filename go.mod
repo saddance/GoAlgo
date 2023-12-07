@@ -2,7 +2,10 @@ module go-hack
 
 go 1.21
 
-require github.com/imroc/req/v3 v3.42.2
+require (
+	github.com/RobinUS2/golang-moving-average v1.0.0
+	github.com/imroc/req/v3 v3.42.2
+)
 
 require (
 	github.com/andybalholm/brotli v1.0.5 // indirect
