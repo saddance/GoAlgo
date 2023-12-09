@@ -3,6 +3,8 @@ package strategy
 import (
 	movingaverage "github.com/RobinUS2/golang-moving-average"
 	"go-hack/moex/candles/models"
+	"go-hack/super_database"
+	"go-hack/telegram_bot"
 )
 
 type MovingType int
@@ -17,7 +19,7 @@ const (
 var shortMA = movingaverage.New(5)
 var longMA = movingaverage.New(10)
 
-func HandleCandleEvent(candle models.Candle) {
+func handleCandleEvent(candle models.Candle) {
 	prevShortAvg := shortMA.Avg()
 	prevLongAvg := longMA.Avg()
 
@@ -26,14 +28,40 @@ func HandleCandleEvent(candle models.Candle) {
 	curShortAvg := shortMA.Avg()
 	curLongAvg := longMA.Avg()
 
+	var offer telegram_bot.StocksOffer
+
+	price := getCandleValue(candle, Close)
 	if prevShortAvg < prevLongAvg && curShortAvg > curLongAvg {
+		//buy offer
+		amount := uint64(5)
 
-		//save offer
-		// bot.send offer
-
+		offerId, _ := super_database.OfferIdGenerator.NewV1()
+		offer = telegram_bot.StocksOffer{
+			offerId,
+			telegram_bot.VanekId,
+			telegram_bot.Buy,
+			amount,
+			price,
+		}
 	} else if prevShortAvg > prevLongAvg && curShortAvg < curLongAvg {
-		// Bot.SendOffer
+		//sell all
+		amount := super_database.YNDX_amount
+
+		if amount != 0 {
+			offerId, _ := super_database.OfferIdGenerator.NewV1()
+			offer = telegram_bot.StocksOffer{
+				offerId,
+				telegram_bot.VanekId,
+				telegram_bot.Sell,
+				amount,
+				price,
+			}
+		} else {
+			return
+		}
 	}
+	super_database.OffersHistory = append(super_database.OffersHistory, offer)
+	telegram_bot.Bot.SendOffer(offer)
 }
 
 func getCandleValue(candle models.Candle, movingType MovingType) float64 {

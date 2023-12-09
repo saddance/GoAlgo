@@ -55,7 +55,7 @@ func (Bot BotWrapper) HandleQuery(query *tgbotapi.CallbackQuery) {
 	if action == Accept {
 		text = "✅Вы подтвердили действие"
 	} else if action == Deny {
-		text = "❌Вы решили не покупать акции"
+		text = "❌Вы отменили действие"
 	}
 
 	msg := tgbotapi.NewEditMessageText(message.Chat.ID, message.MessageID, message.Text+"\n"+text)
@@ -92,11 +92,22 @@ func (Bot BotWrapper) EchoMessage(message *tgbotapi.Message) {
 }
 
 func (Bot BotWrapper) SendOffer(offer StocksOffer) {
-	msg := tgbotapi.NewMessage(offer.TelegramUserId, MessageTextFromOffer(offer))
-
-	buttons := []tgbotapi.InlineKeyboardButton{
-		tgbotapi.NewInlineKeyboardButtonData("✅Купить", fmt.Sprintf("%d_%d", offer.OfferID, Accept)),
-		tgbotapi.NewInlineKeyboardButtonData("❌Не покупать", fmt.Sprintf("%d_%d", offer.OfferID, Deny))}
+	var msg tgbotapi.MessageConfig
+	var buttons []tgbotapi.InlineKeyboardButton
+	switch t := offer.OfferType; t {
+	case Buy:
+		msg = tgbotapi.NewMessage(offer.TelegramUserId, BuyMessageTextFromOffer(offer))
+		buttons = []tgbotapi.InlineKeyboardButton{
+			tgbotapi.NewInlineKeyboardButtonData("✅Купить", fmt.Sprintf("%d_%d", offer.OfferID, Accept)),
+			tgbotapi.NewInlineKeyboardButtonData("❌Не покупать", fmt.Sprintf("%d_%d", offer.OfferID, Deny))}
+	case Sell:
+		msg = tgbotapi.NewMessage(offer.TelegramUserId, SellMessageTextFromOffer(offer))
+		buttons = []tgbotapi.InlineKeyboardButton{
+			tgbotapi.NewInlineKeyboardButtonData("✅Продать", fmt.Sprintf("%d_%d", offer.OfferID, Accept)),
+			tgbotapi.NewInlineKeyboardButtonData("❌Не продавать", fmt.Sprintf("%d_%d", offer.OfferID, Deny))}
+	default:
+		panic("OfferType must be Buy (0) or Sell (1)")
+	}
 
 	KeyboardMarkup := tgbotapi.NewInlineKeyboardMarkup(buttons)
 	msg.ReplyMarkup = KeyboardMarkup
@@ -106,8 +117,14 @@ func (Bot BotWrapper) SendOffer(offer StocksOffer) {
 	}
 }
 
-func MessageTextFromOffer(offer StocksOffer) string {
+func SellMessageTextFromOffer(offer StocksOffer) string {
+	format := "Стратегия предлагает продать акцию %s в количестве %d штук по цене %.2f %s за штуку на сумму %.2f %s"
+	messageText := fmt.Sprintf(format, "YNDX", offer.Amount, offer.Price, "RUB", float64(offer.Amount)*offer.Price, "RUB")
+	return messageText
+}
+
+func BuyMessageTextFromOffer(offer StocksOffer) string {
 	format := "Стратегия предлагает купить акцию %s в количестве %d штук по цене %.2f %s за штуку на сумму %.2f %s"
-	messageText := fmt.Sprintf(format, offer.Ticket, offer.Amount, offer.Price, offer.Currency, offer.TotalPrice, offer.Currency)
+	messageText := fmt.Sprintf(format, "YNDX", offer.Amount, offer.Price, "RUB", float64(offer.Amount)*offer.Price, "RUB")
 	return messageText
 }
