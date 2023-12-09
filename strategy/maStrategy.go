@@ -19,7 +19,7 @@ const (
 var shortMA = movingaverage.New(5)
 var longMA = movingaverage.New(10)
 
-func handleCandleEvent(candle models.Candle) {
+func HandleCandleEvent(candle models.Candle) {
 	prevShortAvg := shortMA.Avg()
 	prevLongAvg := longMA.Avg()
 
