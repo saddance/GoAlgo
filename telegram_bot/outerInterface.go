@@ -3,6 +3,8 @@ package telegram_bot
 import (
 	"fmt"
 	"github.com/gofrs/uuid"
+	"go-hack/super_database"
+	"golang.org/x/exp/slices"
 	"time"
 )
 
@@ -14,11 +16,21 @@ const (
 var global_actions_counter int16
 var Bot = NewBot(BotToken, false)
 
-func ReceiveUserAction(action UserAction) {
-	println(global_actions_counter)
-	global_actions_counter += 1
+func ExecuteOrder(action UserAction) {
+	offerID := action.OfferID
+	offerIdInArray := slices.IndexFunc(super_database.OffersHistory, func(offer StocksOffer) bool { return offer.OfferID == offerID })
 
-	fmt.Printf("Action %d) -------User decided to %s on offer with id %s--------\n", global_actions_counter, action.Action, action.OfferID)
+	offer := super_database.OffersHistory[offerIdInArray]
+
+	if offer.OfferType == Buy {
+		// Simplified: Buy asset, update balance and holdings
+		super_database.Balance -= float64(offer.Amount) * offer.Price
+		super_database.YNDX_amount += offer.Amount
+	} else if offer.OfferType == Sell {
+		// Simplified: Sell asset, update balance and holdings
+		super_database.Balance += float64(offer.Amount) * offer.Price
+		super_database.YNDX_amount -= offer.Amount
+	}
 }
 
 func TestSendOffers() {
