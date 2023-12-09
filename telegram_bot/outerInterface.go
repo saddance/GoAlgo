@@ -3,7 +3,6 @@ package telegram_bot
 import (
 	"fmt"
 	"github.com/gofrs/uuid"
-	"go-hack/super_database"
 	"golang.org/x/exp/slices"
 	"time"
 )
@@ -17,19 +16,25 @@ var global_actions_counter int16
 var Bot = NewBot(BotToken, false)
 
 func ExecuteOrder(action UserAction) {
+	LocalOffersHistory := LoadOffers()
 	offerID := action.OfferID
-	offerIdInArray := slices.IndexFunc(super_database.OffersHistory, func(offer StocksOffer) bool { return offer.OfferID == offerID })
+	offerIdInArray := slices.IndexFunc(LocalOffersHistory, func(offer StocksOffer) bool { return offer.OfferID == offerID })
 
-	offer := super_database.OffersHistory[offerIdInArray]
+	//fmt.Println(OffersHistory)
+	//fmt.Println(offerID)
+	//
+	//fmt.Println("------------------------------------------- %d", offerIdInArray)
+
+	offer := LocalOffersHistory[offerIdInArray]
 
 	if offer.OfferType == Buy {
 		// Simplified: Buy asset, update balance and holdings
-		super_database.Balance -= float64(offer.Amount) * offer.Price
-		super_database.YNDX_amount += offer.Amount
+		Balance -= float64(offer.Amount) * offer.Price
+		YNDX_amount += offer.Amount
 	} else if offer.OfferType == Sell {
 		// Simplified: Sell asset, update balance and holdings
-		super_database.Balance += float64(offer.Amount) * offer.Price
-		super_database.YNDX_amount -= offer.Amount
+		Balance += float64(offer.Amount) * offer.Price
+		YNDX_amount -= offer.Amount
 	}
 }
 

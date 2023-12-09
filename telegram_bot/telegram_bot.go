@@ -58,16 +58,17 @@ func (Bot BotWrapper) HandleQuery(query *tgbotapi.CallbackQuery) {
 		text = "❌Вы отменили действие"
 	}
 
-	msg := tgbotapi.NewEditMessageText(message.Chat.ID, message.MessageID, message.Text+"\n"+text)
+	actionObject := UserAction{OfferID, action}
+
+	ExecuteOrder(actionObject)
+
+	text = message.Text + "\n" + text + fmt.Sprintf("\nВаш баланс: %.2f\nАкций Яндекса в портфеле: %d", Balance, YNDX_amount)
+	msg := tgbotapi.NewEditMessageText(message.Chat.ID, message.MessageID, text)
 
 	_, err := Bot.botObject.Send(msg)
 	if err != nil {
 		println("Something went wrong")
 	}
-
-	actionObject := UserAction{OfferID, action}
-
-	ExecuteOrder(actionObject)
 }
 
 func ParseQueryData(queryData string) (uuid.UUID, uint8) {
@@ -96,12 +97,12 @@ func (Bot BotWrapper) SendOffer(offer StocksOffer) {
 	var buttons []tgbotapi.InlineKeyboardButton
 	switch t := offer.OfferType; t {
 	case Buy:
-		msg = tgbotapi.NewMessage(offer.TelegramUserId, BuyMessageTextFromOffer(offer))
+		msg = tgbotapi.NewMessage(VanekId, BuyMessageTextFromOffer(offer))
 		buttons = []tgbotapi.InlineKeyboardButton{
 			tgbotapi.NewInlineKeyboardButtonData("✅Купить", fmt.Sprintf("%d_%d", offer.OfferID, Accept)),
 			tgbotapi.NewInlineKeyboardButtonData("❌Не покупать", fmt.Sprintf("%d_%d", offer.OfferID, Deny))}
 	case Sell:
-		msg = tgbotapi.NewMessage(offer.TelegramUserId, SellMessageTextFromOffer(offer))
+		msg = tgbotapi.NewMessage(VanekId, SellMessageTextFromOffer(offer))
 		buttons = []tgbotapi.InlineKeyboardButton{
 			tgbotapi.NewInlineKeyboardButtonData("✅Продать", fmt.Sprintf("%d_%d", offer.OfferID, Accept)),
 			tgbotapi.NewInlineKeyboardButtonData("❌Не продавать", fmt.Sprintf("%d_%d", offer.OfferID, Deny))}
@@ -118,12 +119,18 @@ func (Bot BotWrapper) SendOffer(offer StocksOffer) {
 }
 
 func SellMessageTextFromOffer(offer StocksOffer) string {
+	if offer.OfferType != Sell {
+		panic("Must be sell")
+	}
 	format := "Стратегия предлагает продать акцию %s в количестве %d штук по цене %.2f %s за штуку на сумму %.2f %s"
 	messageText := fmt.Sprintf(format, "YNDX", offer.Amount, offer.Price, "RUB", float64(offer.Amount)*offer.Price, "RUB")
 	return messageText
 }
 
 func BuyMessageTextFromOffer(offer StocksOffer) string {
+	if offer.OfferType != Buy {
+		panic("Must be buy")
+	}
 	format := "Стратегия предлагает купить акцию %s в количестве %d штук по цене %.2f %s за штуку на сумму %.2f %s"
 	messageText := fmt.Sprintf(format, "YNDX", offer.Amount, offer.Price, "RUB", float64(offer.Amount)*offer.Price, "RUB")
 	return messageText

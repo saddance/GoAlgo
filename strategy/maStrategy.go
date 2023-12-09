@@ -1,9 +1,9 @@
 package strategy
 
 import (
+	"fmt"
 	movingaverage "github.com/RobinUS2/golang-moving-average"
 	"go-hack/moex/candles/models"
-	"go-hack/super_database"
 	"go-hack/telegram_bot"
 )
 
@@ -28,40 +28,53 @@ func HandleCandleEvent(candle models.Candle) {
 	curShortAvg := shortMA.Avg()
 	curLongAvg := longMA.Avg()
 
-	var offer telegram_bot.StocksOffer
-
-	price := getCandleValue(candle, Close)
+	price := getCandleValue(candle, Open)
 	if prevShortAvg < prevLongAvg && curShortAvg > curLongAvg {
 		//buy offer
+		fmt.Print("buy\n")
 		amount := uint64(5)
+		offerId, _ := telegram_bot.OfferIdGenerator.NewV1()
 
-		offerId, _ := super_database.OfferIdGenerator.NewV1()
-		offer = telegram_bot.StocksOffer{
+		offer := telegram_bot.StocksOffer{
 			offerId,
 			telegram_bot.VanekId,
-			telegram_bot.Buy,
+			telegram_bot.Sell,
 			amount,
 			price,
 		}
+
+		//print(offer.Price)
+		//println(offer.Amount)
+
+		telegram_bot.SaveOffer(offer)
+
+		telegram_bot.Bot.SendOffer(offer)
 	} else if prevShortAvg > prevLongAvg && curShortAvg < curLongAvg {
 		//sell all
-		amount := super_database.YNDX_amount
+		fmt.Print("sell\n")
+		amount := telegram_bot.YNDX_amount
 
 		if amount != 0 {
-			offerId, _ := super_database.OfferIdGenerator.NewV1()
-			offer = telegram_bot.StocksOffer{
+			offerId, _ := telegram_bot.OfferIdGenerator.NewV1()
+
+			offer := telegram_bot.StocksOffer{
 				offerId,
 				telegram_bot.VanekId,
 				telegram_bot.Sell,
 				amount,
 				price,
 			}
-		} else {
-			return
+
+			//print(offer.Price)
+			//println(offer.Amount)
+
+			telegram_bot.SaveOffer(offer)
+			telegram_bot.Bot.SendOffer(offer)
 		}
 	}
-	super_database.OffersHistory = append(super_database.OffersHistory, offer)
-	telegram_bot.Bot.SendOffer(offer)
+
+	//fmt.Print(candle)
+	//println(price)
 }
 
 func getCandleValue(candle models.Candle, movingType MovingType) float64 {
