@@ -18,7 +18,7 @@ type StocksOffer struct {
 	OfferID        uuid.UUID
 	TelegramUserId int64
 	OfferType      uint8
-	Amount         uint64
+	Amount         int64
 	Price          float64
 }
 

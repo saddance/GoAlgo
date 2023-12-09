@@ -60,9 +60,10 @@ func (Bot BotWrapper) HandleQuery(query *tgbotapi.CallbackQuery) {
 
 	actionObject := UserAction{OfferID, action}
 
-	ExecuteOrder(actionObject)
+	price := ExecuteOrder(actionObject)
 
-	text = message.Text + "\n" + text + fmt.Sprintf("\nВаш баланс: %.2f\nАкций Яндекса в портфеле: %d", Balance, YNDX_amount)
+	text = message.Text + "\n" + text + fmt.Sprintf("\n\nВаш баланс: %.2f\nАкций Яндекса в портфеле: %d (%.2f)\nСуммарная стоимость портфеля: %.2f",
+		Balance, YNDX_amount, float64(YNDX_amount)*price, float64(YNDX_amount)*price+Balance)
 	msg := tgbotapi.NewEditMessageText(message.Chat.ID, message.MessageID, text)
 
 	_, err := Bot.botObject.Send(msg)
@@ -78,6 +79,7 @@ func ParseQueryData(queryData string) (uuid.UUID, uint8) {
 	action64, _ := strconv.Atoi(args[1])
 	action8 := uint8(action64)
 
+	println(offerID)
 	OfferUUID, err := uuid.FromString(offerID)
 	if err != nil {
 		panic("Error loading Offer uuid")
@@ -98,17 +100,20 @@ func (Bot BotWrapper) EchoMessage(message *tgbotapi.Message) {
 func (Bot BotWrapper) SendOffer(offer StocksOffer) {
 	var msg tgbotapi.MessageConfig
 	var buttons []tgbotapi.InlineKeyboardButton
+
+	//fmt.Print(offer.OfferID.String())
+
 	switch t := offer.OfferType; t {
 	case Buy:
 		msg = tgbotapi.NewMessage(VanekId, BuyMessageTextFromOffer(offer))
 		buttons = []tgbotapi.InlineKeyboardButton{
-			tgbotapi.NewInlineKeyboardButtonData("✅Купить", fmt.Sprintf("%d_%d", offer.OfferID, Accept)),
-			tgbotapi.NewInlineKeyboardButtonData("❌Не покупать", fmt.Sprintf("%d_%d", offer.OfferID, Deny))}
+			tgbotapi.NewInlineKeyboardButtonData("✅Купить", fmt.Sprintf("%s_%d", fmt.Sprintf(offer.OfferID.String()), Accept)),
+			tgbotapi.NewInlineKeyboardButtonData("❌Не покупать", fmt.Sprintf("%s_%d", fmt.Sprintf(offer.OfferID.String()), Deny))}
 	case Sell:
 		msg = tgbotapi.NewMessage(VanekId, SellMessageTextFromOffer(offer))
 		buttons = []tgbotapi.InlineKeyboardButton{
-			tgbotapi.NewInlineKeyboardButtonData("✅Продать", fmt.Sprintf("%d_%d", offer.OfferID, Accept)),
-			tgbotapi.NewInlineKeyboardButtonData("❌Не продавать", fmt.Sprintf("%d_%d", offer.OfferID, Deny))}
+			tgbotapi.NewInlineKeyboardButtonData("✅Продать", fmt.Sprintf("%s_%d", fmt.Sprintf(offer.OfferID.String()), Accept)),
+			tgbotapi.NewInlineKeyboardButtonData("❌Не продавать", fmt.Sprintf("%s_%d", fmt.Sprintf(offer.OfferID.String()), Deny))}
 	default:
 		panic("OfferType must be Buy (0) or Sell (1)")
 	}

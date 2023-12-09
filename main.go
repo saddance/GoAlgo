@@ -10,7 +10,7 @@ import (
 func main() {
 	go telegram_bot.Bot.RunBot()
 	//for {
-	date, err := time.Parse(time.DateOnly, "2023-12-01")
+	date, err := time.Parse(time.DateOnly, "2023-09-12")
 	if err != nil {
 		panic(err)
 	}
@@ -23,7 +23,7 @@ func main() {
 	for i := 0; i < len(res); i++ {
 		go strategy.HandleCandleEvent(res[i])
 		println(i)
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(300 * time.Millisecond)
 	}
 	//fmt.Println(len(res))
 	//

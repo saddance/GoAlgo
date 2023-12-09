@@ -15,7 +15,7 @@ const (
 var global_actions_counter int16
 var Bot = NewBot(BotToken, false)
 
-func ExecuteOrder(action UserAction) {
+func ExecuteOrder(action UserAction) float64 {
 	LocalOffersHistory := LoadOffers()
 	offerID := action.OfferID
 	offerIdInArray := slices.IndexFunc(LocalOffersHistory, func(offer StocksOffer) bool { return offer.OfferID == offerID })
@@ -36,6 +36,8 @@ func ExecuteOrder(action UserAction) {
 		Balance += float64(offer.Amount) * offer.Price
 		YNDX_amount -= offer.Amount
 	}
+
+	return offer.Price
 }
 
 func TestSendOffers() {

@@ -32,7 +32,31 @@ func HandleCandleEvent(candle models.Candle) {
 	if prevShortAvg < prevLongAvg && curShortAvg > curLongAvg {
 		//buy offer
 		fmt.Print("buy\n")
-		amount := uint64(5)
+		amount := int64(5)
+		offerId, _ := telegram_bot.OfferIdGenerator.NewV1()
+
+		offer := telegram_bot.StocksOffer{
+			offerId,
+			telegram_bot.VanekId,
+			telegram_bot.Buy,
+			amount,
+			price,
+		}
+
+		//print(offer.Price)
+		//println(offer.Amount)
+
+		telegram_bot.SaveOffer(offer)
+
+		telegram_bot.Bot.SendOffer(offer)
+	} else if prevShortAvg > prevLongAvg && curShortAvg < curLongAvg {
+		//sell all
+		fmt.Print("sell\n")
+		amount := int64(5)
+		if telegram_bot.YNDX_amount <= amount {
+			return
+		}
+
 		offerId, _ := telegram_bot.OfferIdGenerator.NewV1()
 
 		offer := telegram_bot.StocksOffer{
@@ -47,30 +71,7 @@ func HandleCandleEvent(candle models.Candle) {
 		//println(offer.Amount)
 
 		telegram_bot.SaveOffer(offer)
-
 		telegram_bot.Bot.SendOffer(offer)
-	} else if prevShortAvg > prevLongAvg && curShortAvg < curLongAvg {
-		//sell all
-		fmt.Print("sell\n")
-		amount := telegram_bot.YNDX_amount
-
-		if amount != 0 {
-			offerId, _ := telegram_bot.OfferIdGenerator.NewV1()
-
-			offer := telegram_bot.StocksOffer{
-				offerId,
-				telegram_bot.VanekId,
-				telegram_bot.Sell,
-				amount,
-				price,
-			}
-
-			//print(offer.Price)
-			//println(offer.Amount)
-
-			telegram_bot.SaveOffer(offer)
-			telegram_bot.Bot.SendOffer(offer)
-		}
 	}
 
 	//fmt.Print(candle)
