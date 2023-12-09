@@ -17,7 +17,7 @@ const (
 var shortMA = movingaverage.New(5)
 var longMA = movingaverage.New(10)
 
-func handleCandleEvent(candle models.Candle) {
+func HandleCandleEvent(candle models.Candle) {
 	prevShortAvg := shortMA.Avg()
 	prevLongAvg := longMA.Avg()
 
@@ -27,9 +27,12 @@ func handleCandleEvent(candle models.Candle) {
 	curLongAvg := longMA.Avg()
 
 	if prevShortAvg < prevLongAvg && curShortAvg > curLongAvg {
-		//buy
+
+		//save offer
+		// bot.send offer
+
 	} else if prevShortAvg > prevLongAvg && curShortAvg < curLongAvg {
-		//sell all
+		// Bot.SendOffer
 	}
 }
 

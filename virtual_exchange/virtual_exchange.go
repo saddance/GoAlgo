@@ -2,6 +2,7 @@ package main
 
 import (
 	candle "go-hack/moex/candles/models"
+	"go-hack/strategy"
 )
 
 // Account represents a virtual trading account.
@@ -15,10 +16,14 @@ var candles []candle.Candle
 
 func SaveCandle(c candle.Candle) {
 	candles = append(candles, c)
+	strategy.HandleCandleEvent(c)
 }
 
 // ExecuteOrder simulates executing a trade order.
 func (a *Account) ExecuteOrder(price, amount float64, buy bool) {
+
+	//get order from memory
+
 	if buy {
 		// Simplified: Buy asset, update balance and holdings
 		a.Holdings += amount
@@ -29,13 +34,3 @@ func (a *Account) ExecuteOrder(price, amount float64, buy bool) {
 		a.Balance += price * amount
 	}
 }
-
-//func main() {
-//	account := Account{Balance: 1000.0, Holdings: 0.0}
-//	price := 50.0                             // Example price
-//	amount := 5.0                             // Example amount to buy/sell
-//	account.ExecuteOrder(price, amount, true) // Buy
-//	fmt.Println("Account after buying:", account)
-//	account.ExecuteOrder(price, amount, false) // Sell
-//	fmt.Println("Account after selling:", account)
-//}

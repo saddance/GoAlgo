@@ -117,12 +117,3 @@ func GetStockRatings(stock string) (float64, error) {
 	rating, err := getStockRating(contentNews)
 	return rating, nil
 }
-
-func main() {
-	rating, err := GetStockRatings("Nvidia")
-	if err != nil {
-		fmt.Printf("Error: %s\n", err)
-		return
-	}
-	fmt.Printf("Rating: %f\n", rating)
-}
