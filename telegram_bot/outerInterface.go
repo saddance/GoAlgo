@@ -7,10 +7,12 @@ import (
 )
 
 const (
-	BOT_TOKEN = "6721745889:AAE3eqJMlp06VuoQQjDO6NpdXJEXuuzoZqY"
+	BotToken = "6721745889:AAE3eqJMlp06VuoQQjDO6NpdXJEXuuzoZqY"
+	VanekId  = 409733921
 )
 
 var global_actions_counter int16
+var Bot = NewBot(BotToken, false)
 
 func ReceiveUserAction(action UserAction) {
 	println(global_actions_counter)
@@ -19,29 +21,24 @@ func ReceiveUserAction(action UserAction) {
 	fmt.Printf("Action %d) -------User decided to %s on offer with id %s--------\n", global_actions_counter, action.Action, action.OfferID)
 }
 
-func UseBot() {
-	Bot := NewBot(BOT_TOKEN, false)
-
+func TestSendOffers() {
 	Uuid, _ := uuid.NewV1()
-
 	offer := StocksOffer{
 		Uuid,
-		409733921,
-		"GAZP",
+		VanekId,
+		Buy,
 		4,
 		100,
-		"RUB",
-		400,
 	}
 
-	go Bot.RunBot()
 	for i := 0; i < 5; i++ {
 		fmt.Println(i)
 		Bot.SendOffer(offer)
-		time.Sleep(30 * time.Second)
+		time.Sleep(5 * time.Second)
 	}
 }
 
-func main() {
-	UseBot()
-}
+//func main() {
+//	go Bot.RunBot()
+//	TestSendOffers()
+//}

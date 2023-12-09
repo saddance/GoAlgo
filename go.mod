@@ -3,8 +3,11 @@ module go-hack
 go 1.21
 
 require (
+	github.com/RobinUS2/golang-moving-average v1.0.0
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
+	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/imroc/req/v3 v3.42.2
+	github.com/sashabaranov/go-openai v1.17.9
 )
 
 require (
@@ -12,7 +15,6 @@ require (
 	github.com/cloudflare/circl v1.3.3 // indirect
 	github.com/gaukas/godicttls v0.0.4 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
-	github.com/gofrs/uuid v4.4.0+incompatible // indirect
 	github.com/golang/mock v1.6.0 // indirect
 	github.com/google/pprof v0.0.0-20230901174712-0191c66da455 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect

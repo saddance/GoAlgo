@@ -9,14 +9,17 @@ const (
 	Accept
 )
 
+const (
+	Buy uint8 = iota
+	Sell
+)
+
 type StocksOffer struct {
 	OfferID        uuid.UUID
 	TelegramUserId int64
-	Ticket         string
+	OfferType      uint8
 	Amount         uint64
 	Price          float64
-	Currency       string
-	TotalPrice     float64
 }
 
 type UserAction struct {
