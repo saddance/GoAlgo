@@ -78,7 +78,10 @@ func ParseQueryData(queryData string) (uuid.UUID, uint8) {
 	action64, _ := strconv.Atoi(args[1])
 	action8 := uint8(action64)
 
-	OfferUUID, _ := uuid.FromString(offerID)
+	OfferUUID, err := uuid.FromString(offerID)
+	if err != nil {
+		panic("Error loading Offer uuid")
+	}
 
 	return OfferUUID, action8
 }
