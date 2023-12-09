@@ -67,7 +67,7 @@ func (Bot BotWrapper) HandleQuery(query *tgbotapi.CallbackQuery) {
 
 	actionObject := UserAction{OfferID, action}
 
-	ReceiveUserAction(actionObject)
+	ExecuteOrder(actionObject)
 }
 
 func ParseQueryData(queryData string) (uuid.UUID, uint8) {
